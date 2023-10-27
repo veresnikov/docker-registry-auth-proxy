@@ -43,6 +43,9 @@ func serveImpl(ctx context.Context, logger applogger.Logger, cnf *Config) error 
 
 	router := mux.NewRouter()
 	router.Use(LoggingMiddleware(logger))
+	router.HandleFunc("/resilience/ready", func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 	router.HandleFunc("/v1/_ping", registryProxy.UnsecureServeHTTP)
 	router.HandleFunc("/v1/search", registryProxy.UnsecureServeHTTP)
 	router.PathPrefix("/").HandlerFunc(registryProxy.SecureServeHTTP)
