@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -82,12 +83,14 @@ func LoggingMiddleware(logger applogger.Logger) mux.MiddlewareFunc {
 			start := time.Now()
 			h.ServeHTTP(wrappedWriter, r)
 			duration := time.Since(start)
-			logger.WithFields(applogger.Fields{
-				"method":   r.Method,
-				"url":      r.URL.String(),
-				"code":     wrappedWriter.statusCode,
-				"duration": duration.String(),
-			}).Info("call finished")
+			if !strings.Contains(r.URL.String(), "/resilience/ready") {
+				logger.WithFields(applogger.Fields{
+					"method":   r.Method,
+					"url":      r.URL.String(),
+					"code":     wrappedWriter.statusCode,
+					"duration": duration.String(),
+				}).Info("call finished")
+			}
 		})
 	}
 }
